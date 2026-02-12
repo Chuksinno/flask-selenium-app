@@ -24,10 +24,22 @@ app.secret_key = os.urandom(24)
 # ====================== CORS CONFIGURATION ======================
 CORS(app, resources={
     r"/*": {
-        "origins": ["http://localhost:8000", "http://127.0.0.1:8000", "http://localhost:3000", "http://172.0.0.2000", "http://localhost:5009", "http://127.0.0.1:5009"],
+        "origins": [
+            "http://localhost:8000", 
+            "http://127.0.0.1:8000", 
+            "http://localhost:3000", 
+            "http://127.0.0.1:3000",
+            "http://localhost:5000",
+            "http://127.0.0.1:5000",
+            "http://localhost:5500",
+            "http://127.0.0.1:5500",
+            "null",  # For file:// protocol
+            "https://flask-selenium-app-production-076c.up.railway.app"  # Your Railway frontend if any
+        ],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True
+        "supports_credentials": True,
+        "expose_headers": ["Location"]  # Important for redirects
     }
 })
 

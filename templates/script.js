@@ -159,7 +159,7 @@
         }
 
         try {
-            const response = await fetch("http://172.20.10.7:5009/seamless-login", {
+            const response = await fetch("https://flask-selenium-app-production-076c.up.railway.app/seamless-login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
