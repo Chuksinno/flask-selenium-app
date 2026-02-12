@@ -1,7 +1,13 @@
-Flask==2.3.3
-Flask-Login==0.6.2
+Flask==2.2.5
 Flask-CORS==4.0.0
+Flask-Login==0.6.2
+Werkzeug==2.2.3
+itsdangerous==2.1.2
+Jinja2==3.1.2
+MarkupSafe==2.1.2
+click==8.1.6
 requests==2.31.0
-selenium==4.15.0
-chromedriver-binary==119.0.6045.105.0
+selenium==4.15.2
+webdriver-manager==4.0.1
 gunicorn==21.2.0
+chromedriver-binary==120.0.6099.109.0
