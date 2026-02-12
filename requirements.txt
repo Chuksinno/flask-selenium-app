@@ -1,0 +1,7 @@
+Flask==2.3.3
+Flask-Login==0.6.2
+Flask-CORS==4.0.0
+requests==2.31.0
+selenium==4.15.0
+chromedriver-binary==119.0.6045.105.0
+gunicorn==21.2.0
