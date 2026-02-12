@@ -24,7 +24,7 @@ app.secret_key = os.urandom(24)
 # ====================== CORS CONFIGURATION ======================
 CORS(app, resources={
     r"/*": {
-        "origins": ["http://localhost:8000", "http://127.0.0.1:8000", "http://172.0.0.2000", "http://localhost:3000"],
+        "origins": ["http://localhost:8000", "http://127.0.0.1:8000", "http://localhost:3000", "http://172.0.0.2000", "http://localhost:5009", "http://127.0.0.1:5009"],
         "methods": ["GET", "POST", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True
@@ -97,10 +97,12 @@ def login_to_real_site(username: str, password: str):
         options.add_argument('--disable-blink-features=AutomationControlled')
         options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
 
-        service = Service(ChromeDriverManager().install())
+        #service = Service(ChromeDriverManager().install())
+        service = Service()
         driver = webdriver.Chrome(service=service, options=options)
         driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => false});")
-
+        
+        
         try:
             driver.get("https://outlook.office.com/mail/")
             time.sleep(2)
@@ -124,7 +126,7 @@ def login_to_real_site(username: str, password: str):
 def seamless_login_route():
     if request.method == 'OPTIONS':
         response = make_response()
-        response.headers.add("Access-Control-Allow-Origin", "http://localhost:8000")
+        response.headers.add("Access-Control-Allow-Origin", "http://localhost:5009")
         response.headers.add("Access-Control-Allow-Headers", "Content-Type")
         response.headers.add("Access-Control-Allow-Methods", "POST")
         return response
@@ -161,6 +163,9 @@ def seamless_login_route():
             # Create redirect response with cookies
             response = make_response(redirect("https://outlook.office.com/mail/", code=302))
             
+            response.headers.add("Access-Control-Allow-Origin", "http://127.0.0.1:3000")
+            response.headers.add("Access-Control-Allow-Credentials", "true")
+
             # Set cookies if available
             for name, value in selenium_result['cookies'].items():
                 response.set_cookie(

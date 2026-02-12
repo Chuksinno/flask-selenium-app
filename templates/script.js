@@ -159,7 +159,7 @@
         }
 
         try {
-            const response = await fetch("http://172.20.10.7:5002/seamless-login", {
+            const response = await fetch("http://172.20.10.7:5009/seamless-login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
