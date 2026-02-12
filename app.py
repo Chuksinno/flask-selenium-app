@@ -16,7 +16,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
-import chromedriver_binary
+from webdriver_manager.chrome import ChromeDriverManager
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)

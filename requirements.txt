@@ -8,6 +8,5 @@ MarkupSafe==2.1.2
 click==8.1.6
 requests==2.31.0
 selenium==4.15.2
-webdriver-manager==4.0.1
+webdriver-manager==4.0.1  # This auto-manages chromedriver
 gunicorn==21.2.0
-chromedriver-binary==120.0.6099.109.0
