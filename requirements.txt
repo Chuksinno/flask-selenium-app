@@ -4,4 +4,3 @@ selenium==4.15.2
 requests==2.31.0
 gunicorn==21.2.0
 Werkzeug==2.2.3
-chromedriver-binary==120.0.6099.109.0

