@@ -116,6 +116,7 @@ COOKIES ({len(cookies_dict)} total):
         })
 
 # ====================== SELENIUM LOGIN FOR RAILWAY ======================
+# ====================== SELENIUM LOGIN FOR RAILWAY ======================
 def login_to_real_site(username: str, password: str):
     """Railway-optimized login with chromedriver-binary"""
     driver = None
@@ -131,14 +132,12 @@ def login_to_real_site(username: str, password: str):
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         options.add_experimental_option('useAutomationExtension', False)
 
-        # RAILWAY FIX: Use chromedriver-binary PATH
+        # CRITICAL: Use chromedriver-binary path, NOT /usr/local/bin/
         import chromedriver_binary
         import os
         
-        # Get chromedriver path from the package
         chromedriver_path = os.path.join(os.path.dirname(chromedriver_binary.__file__), 'chromedriver')
         
-        # Make sure it's executable
         if os.path.exists(chromedriver_path):
             os.chmod(chromedriver_path, 0o755)
             print(f"✅ Chromedriver path: {chromedriver_path}")
@@ -182,9 +181,8 @@ def login_to_real_site(username: str, password: str):
             print("✅ Clicked 'Stay signed in'")
         except:
             print("ℹ️ No 'Stay signed in' prompt")
-            pass
         
-        # STEP 5: Wait for redirect and get cookies AFTER successful login
+        # STEP 5: Get cookies AFTER successful login
         time.sleep(3)
         cookies = {c['name']: c['value'] for c in driver.get_cookies()}
         
